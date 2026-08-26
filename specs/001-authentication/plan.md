@@ -87,8 +87,8 @@ dispositivos, órdenes, frontend y demás funcionalidades indicadas por la spec.
 - `AccountsModule` encapsula el acceso a la cuenta y su proyección pública; no incorpora CRUD.
 - `WorkshopsModule` encapsula el taller y su proyección pública; no incorpora CRUD.
 - `PrismaModule` proporciona el único cliente Prisma.
-- `CommonModule` contiene exclusivamente filtro de errores, tipos de respuesta y utilidades
-  transversales realmente compartidas.
+- Los componentes bajo `src/common/` no forman un `CommonModule`: `AppModule` o el módulo
+  responsable registra explícitamente cada filtro, tipo o utilidad transversal que utiliza.
 
 Se descartan módulos por cada endpoint, repositorios genéricos y capas de casos de uso adicionales:
 no resuelven una necesidad concreta del alcance.
@@ -123,11 +123,13 @@ aparece por nombre/placeholder en `.env.example`. La aplicación falla al arranc
 o perderlo impide verificar contraseñas existentes y normalmente obliga a restablecerlas. Contraseña,
 prehash, pepper y hash bcrypt quedan excluidos de logs y respuestas.
 
-Las pruebas unitarias pueden aislar el costo, pero integración y E2E deben verificar al menos una vez
-que el hash real no coincide con la contraseña, que bcrypt lo valida, que contraseñas UTF-8 de más de
-72 bytes usan la entrada completa y que dos contraseñas iguales hasta ese límite pero distintas
-después no autentican como equivalentes. También deben probar que el arranque falla sin pepper y que
-pepper y prehash nunca aparecen en logs ni respuestas.
+Las pruebas unitarias aíslan la transformación HMAC-SHA-384 Base64 y la interacción con bcrypt. La
+integración con PostgreSQL usa bcrypt real para verificar que el hash persistido no coincide con la
+contraseña, que la contraseña correcta valida, que contraseñas UTF-8 de más de 72 bytes usan la
+entrada completa y que dos contraseñas iguales hasta ese límite pero distintas después no son
+equivalentes. E2E valida el comportamiento HTTP y la proyección pública, mientras una auditoría
+transversal comprueba que contraseña, prehash, pepper y hashes nunca aparecen en respuestas, logs ni
+errores. También se prueba que el arranque falla ante cualquier secreto ausente o repetido.
 
 ### Tokens y sesiones independientes
 
@@ -269,6 +271,8 @@ El contrato detallado está en [contracts/auth-api.md](./contracts/auth-api.md):
 - Dos registros concurrentes del mismo correo normalizado crean como máximo una cuenta: CE-001–002.
 - Relación uno a uno y varias sesiones por cuenta: RF-002, RF-016.
 - Solo se persisten hash de contraseña y hash de refresh: RF-005, RF-020.
+- Login crea sesiones y credenciales independientes sin persistir secretos brutos: RF-005–RF-008,
+  RF-016, RF-020.
 - Rotación produce una sola credencial `ACTIVE`; dos refresh concurrentes revocan solo su sesión:
   RF-012–RF-013, CE-006, CE-010.
 - Logout y reutilización no modifican otra sesión: RF-014–RF-017.
@@ -293,16 +297,26 @@ El contrato detallado está en [contracts/auth-api.md](./contracts/auth-api.md):
 Cada prueba debe nombrar o anotar RF/CE cubiertos. La evidencia final incluye `format`, `lint`,
 `test`, pruebas de integración, E2E y `build`.
 
+El rendimiento de bcrypt costo 12 se mide con hash y comparación reales en el entorno local. Cada
+operación debe permanecer por debajo de un segundo. Tras el primer deploy se repite un smoke
+benchmark de login, separando razonablemente la latencia de red y sin registrar contraseña, prehash,
+pepper ni hashes.
+
 ## Migraciones, ejecución local y deploy
 
-- Desarrollo crea migraciones con `prisma migrate dev`; los SQL generados se revisan y versionan.
+- Desarrollo crea la migración inicial con `prisma migrate dev --name authentication`; Prisma
+  Migrate genera el timestamp del directorio `prisma/migrations/<timestamp>_authentication/migration.sql`,
+  y el SQL resultante se revisa y versiona.
 - CI/deploy aplica únicamente `prisma migrate deploy` antes de iniciar la API.
 - `prisma migrate status` verifica divergencias. `prisma db push` queda excluido fuera de
   prototipos descartables.
+- La verificación aplica `prisma migrate deploy` desde cero y vuelve a ejecutarlo sobre una base ya
+  actualizada, donde no debe producir cambios ni errores.
 - PostgreSQL local se ejecuta mediante un servicio documentado; la API y pruebas reciben conexiones
   distintas.
-- El deploy inicial usa una única instancia, variables inyectadas por el entorno, migración previa,
-  health check de plataforma y Swagger coherente con el código versionado.
+- El primer deploy verificable entrega únicamente autenticación en una instancia, con PostgreSQL
+  gestionado, variables inyectadas, `prisma migrate deploy`, Swagger y smoke tests remotos sobre el
+  código versionado. Se actualizará al incorporar las demás features del MVP.
 - `.env.example` incluye nombres y valores no secretos de ejemplo; el archivo `.env` real no se
   versiona.
 
@@ -325,8 +339,10 @@ Cada prueba debe nombrar o anotar RF/CE cubiertos. La evidencia final incluye `f
 | `TRUST_PROXY` | Proxies conocidos o desactivado |
 | `RATE_LIMIT_KEY_SECRET` | HMAC de trackers de identidad |
 
-Los secretos deben ser diferentes, suficientemente largos y nunca usar los valores ilustrativos de
-`.env.example`. `PASSWORD_PEPPER` solo se documenta allí mediante un placeholder sin valor real. El
+La validación compara por pares `JWT_SECRET`, `JWT_REFRESH_SECRET`, `PASSWORD_PEPPER` y
+`RATE_LIMIT_KEY_SECRET`: los cuatro deben ser diferentes entre sí y el arranque falla ante cualquier
+coincidencia. Deben ser suficientemente largos y nunca usar valores ilustrativos de `.env.example`.
+`PASSWORD_PEPPER` solo se documenta allí mediante un placeholder sin valor real. El
 TTL reducido de `1s` pertenece exclusivamente a la configuración de una aplicación E2E aislada: no
 modifica los valores normales ni `.env.example`.
 

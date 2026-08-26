@@ -15,7 +15,7 @@ no ejecuta comandos, instala dependencias ni inicializa NestJS.
 ```bash
 pnpm install
 pnpm prisma generate
-pnpm prisma migrate dev
+pnpm prisma migrate dev --name authentication
 ```
 
 Para CI o deploy, sustituir `migrate dev` por:
@@ -30,17 +30,19 @@ No usar `prisma db push` en un entorno persistente.
 
 Antes de iniciar:
 
-- `JWT_SECRET` y `JWT_REFRESH_SECRET` existen y son diferentes.
+- `JWT_SECRET`, `JWT_REFRESH_SECRET`, `PASSWORD_PEPPER` y `RATE_LIMIT_KEY_SECRET` existen y
+  son diferentes entre sí mediante comparación por pares.
 - `JWT_ACCESS_TTL=15m`.
 - `JWT_REFRESH_TTL=7d`.
 - `BCRYPT_ROUNDS=12`.
-- `PASSWORD_PEPPER` contiene un secreto local no vacío y diferente de los secretos JWT.
+- `PASSWORD_PEPPER` contiene un secreto local no vacío.
 - `CORS_ALLOWED_ORIGINS` contiene únicamente orígenes explícitos.
 - `DATABASE_URL` apunta a la base correcta.
-- `RATE_LIMIT_KEY_SECRET` no coincide con secretos JWT.
+- Ninguno de los cuatro secretos coincide con otro.
 
-La aplicación debe fallar al arrancar si falta una variable obligatoria o si los secretos JWT
-coinciden. También debe fallar si falta `PASSWORD_PEPPER`. El archivo `.env.example` documenta el
+La aplicación debe fallar al arrancar si falta una variable obligatoria o si cualquier par entre
+`JWT_SECRET`, `JWT_REFRESH_SECRET`, `PASSWORD_PEPPER` y `RATE_LIMIT_KEY_SECRET` coincide. El
+archivo `.env.example` documenta el
 nombre mediante un placeholder, nunca un pepper real. Cambiar o perder este secreto impide verificar
 contraseñas existentes y normalmente requiere restablecerlas.
 
@@ -52,6 +54,7 @@ pnpm lint
 pnpm test
 pnpm test:integration
 pnpm test:e2e
+pnpm test:bench:auth
 pnpm build
 pnpm prisma migrate status
 ```
@@ -173,6 +176,8 @@ La feature está lista para entrega únicamente cuando:
 
 - todas las verificaciones disponibles terminan correctamente;
 - las migraciones se aplican desde cero y sobre una base actualizada;
+- una segunda ejecución de `prisma migrate deploy` sobre la base actualizada no produce cambios ni
+  errores, y ninguna verificación usa `prisma db push`;
 - Swagger coincide con [contracts/auth-api.md](./contracts/auth-api.md);
 - no aparecen secretos en respuestas ni logs;
 - se adjunta evidencia de format, lint, tests, build y deploy.
