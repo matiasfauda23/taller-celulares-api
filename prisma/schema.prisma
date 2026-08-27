@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum SessionRevocationReason {
+  LOGOUT
+  TOKEN_REUSE
+}
+
+enum RefreshCredentialStatus {
+  ACTIVE
+  ROTATED
+}
+
+model Account {
+  id           String    @id @default(uuid()) @db.Uuid
+  ownerName    String    @db.VarChar(100)
+  email        String    @unique @db.VarChar(254)
+  passwordHash String
+  createdAt    DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime  @updatedAt @db.Timestamptz(3)
+  workshop     Workshop?
+  sessions     Session[]
+}
+
+model Workshop {
+  id        String   @id @default(uuid()) @db.Uuid
+  accountId String   @unique @db.Uuid
+  name      String   @db.VarChar(120)
+  address   String   @db.VarChar(200)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Restrict)
+}
+
+model Session {
+  id               String                   @id @default(uuid()) @db.Uuid
+  accountId        String                   @db.Uuid
+  version          Int                      @default(0)
+  expiresAt        DateTime                 @db.Timestamptz(3)
+  revokedAt        DateTime?                @db.Timestamptz(3)
+  revocationReason SessionRevocationReason?
+  createdAt        DateTime                 @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime                 @updatedAt @db.Timestamptz(3)
+  account          Account                  @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  credentials      RefreshCredential[]      @relation("SessionCredentials")
+
+  @@index([accountId, revokedAt])
+}
+
+model RefreshCredential {
+  id          String                  @id @default(uuid()) @db.Uuid
+  sessionId   String                  @db.Uuid
+  tokenHash   String                  @unique @db.Char(64)
+  status      RefreshCredentialStatus @default(ACTIVE)
+  expiresAt   DateTime                @db.Timestamptz(3)
+  rotatedAt   DateTime?               @db.Timestamptz(3)
+  successorId String?                 @unique @db.Uuid
+  createdAt   DateTime                @default(now()) @db.Timestamptz(3)
+  session     Session                 @relation("SessionCredentials", fields: [sessionId], references: [id], onDelete: Restrict)
+  successor   RefreshCredential?      @relation("CredentialSuccessor", fields: [successorId], references: [id], onDelete: Restrict)
+  predecessor RefreshCredential?      @relation("CredentialSuccessor")
+
+  @@index([sessionId, status])
+  @@index([expiresAt])
+}

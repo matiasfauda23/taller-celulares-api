@@ -80,14 +80,22 @@ description: "Tareas ordenadas por dependencias para la feature de autenticació
 
 **Dependencia**: Fase 2 completa.
 
-- [ ] T017 Inicializar Prisma para PostgreSQL en `prisma/schema.prisma` y `prisma.config.ts`; verificar que `DATABASE_URL` sea la única conexión y que todavía no se genere ninguna migración
-- [ ] T018 Implementar `PrismaService` y exportarlo desde `PrismaModule` en `src/prisma/prisma.service.ts` y `src/prisma/prisma.module.ts`; verificar un único Prisma Client inyectable
-- [ ] T019 Importar `PrismaModule` en `src/app.module.ts`; verificar que la composición raíz resuelva persistencia sin clientes adicionales
-- [ ] T020 Definir Account y Workshop con UUID, timestamps, email único normalizado, `passwordHash`, relación uno a uno mediante `Workshop.accountId @unique` y borrado restrictivo en `prisma/schema.prisma` (RF-001–RF-005; US1; CE-001, CE-002)
-- [ ] T021 Definir Session y RefreshCredential con versión, expiración, revocación, estados `ACTIVE`/`ROTATED`, hash único, sucesora única e índices en `prisma/schema.prisma` (RF-010–RF-017, RF-028; US4, US5; CE-006, CE-010, CE-012); verificar que no exista un campo para el refresh token bruto
-- [ ] T022 Generar la única migración inicial mediante Prisma Migrate con el nombre `authentication` y revisar el archivo resultante en `prisma/migrations/<timestamp>_authentication/migration.sql`, cuyo timestamp genera Prisma; verificar UUID, claves foráneas, restricciones, índices, enums y borrados sin tablas fuera del alcance
-- [ ] T023 Crear el entorno PostgreSQL aislado y la prueba de migraciones en `test/integration/setup/postgres.setup.ts` y `test/integration/prisma/migration.integration.spec.ts`; verificar migración desde una base vacía, una segunda ejecución de `prisma migrate deploy` sobre una base actualizada sin cambios ni errores, `migrate status` y ausencia de `prisma db push`
-- [ ] T024 Ejecutar la verificación de `test/integration/prisma/migration.integration.spec.ts` contra `prisma/migrations/<timestamp>_authentication/migration.sql`, donde Prisma Migrate genera el timestamp al crear la migración llamada `authentication`; punto de control: demostrar desde cero y sobre una base actualizada que la única migración crea exactamente Account, Workshop, Session y RefreshCredential y genera Prisma Client desde el mismo schema
+- [x] T017 Inicializar Prisma para PostgreSQL en `prisma/schema.prisma` y `prisma.config.ts`; verificar que `DATABASE_URL` sea la única conexión y que todavía no se genere ninguna migración
+  - Evidencia: Prisma 7 valida el schema PostgreSQL y obtiene su única conexión desde `DATABASE_URL` en `prisma.config.ts`.
+- [x] T018 Implementar `PrismaService` y exportarlo desde `PrismaModule` en `src/prisma/prisma.service.ts` y `src/prisma/prisma.module.ts`; verificar un único Prisma Client inyectable
+  - Evidencia: `PrismaService` extiende el único `PrismaClient`, usa el adaptador PostgreSQL y se exporta globalmente.
+- [x] T019 Importar `PrismaModule` en `src/app.module.ts`; verificar que la composición raíz resuelva persistencia sin clientes adicionales
+  - Evidencia: `AppModule` importa `PrismaModule`; build y resolución de dependencias completados.
+- [x] T020 Definir Account y Workshop con UUID, timestamps, email único normalizado, `passwordHash`, relación uno a uno mediante `Workshop.accountId @unique` y borrado restrictivo en `prisma/schema.prisma` (RF-001–RF-005; US1; CE-001, CE-002)
+  - Evidencia: migración inspeccionada contiene UUID, timestamps, email único, relación uno a uno y FK `RESTRICT`.
+- [x] T021 Definir Session y RefreshCredential con versión, expiración, revocación, estados `ACTIVE`/`ROTATED`, hash único, sucesora única e índices en `prisma/schema.prisma` (RF-010–RF-017, RF-028; US4, US5; CE-006, CE-010, CE-012); verificar que no exista un campo para el refresh token bruto
+  - Evidencia: prueba de integración confirma enums, hash y sucesora únicos, índices y ausencia de columnas para JWT bruto.
+- [x] T022 Generar la única migración inicial mediante Prisma Migrate con el nombre `authentication` y revisar el archivo resultante en `prisma/migrations/<timestamp>_authentication/migration.sql`, cuyo timestamp genera Prisma; verificar UUID, claves foráneas, restricciones, índices, enums y borrados sin tablas fuera del alcance
+  - Evidencia: `20260827201404_authentication/migration.sql` fue generado por `prisma migrate dev` y crea solo las cuatro tablas aprobadas.
+- [x] T023 Crear el entorno PostgreSQL aislado y la prueba de migraciones en `test/integration/setup/postgres.setup.ts` y `test/integration/prisma/migration.integration.spec.ts`; verificar migración desde una base vacía, una segunda ejecución de `prisma migrate deploy` sobre una base actualizada sin cambios ni errores, `migrate status` y ausencia de `prisma db push`
+  - Evidencia: prueba contra `taller_auth_test` recrea el schema, aplica deploy dos veces y valida status sin usar `db push`.
+- [x] T024 Ejecutar la verificación de `test/integration/prisma/migration.integration.spec.ts` contra `prisma/migrations/<timestamp>_authentication/migration.sql`, donde Prisma Migrate genera el timestamp al crear la migración llamada `authentication`; punto de control: demostrar desde cero y sobre una base actualizada que la única migración crea exactamente Account, Workshop, Session y RefreshCredential y genera Prisma Client desde el mismo schema
+  - Evidencia: `test:integration` pasa 2/2; `prisma:generate`, `migrate:status` y deploy idempotente pasan.
 
 ## Fase 4: PasswordService y TokenService
 
@@ -95,12 +103,18 @@ description: "Tareas ordenadas por dependencias para la feature de autenticació
 
 **Dependencia**: Fase 3 completa.
 
-- [ ] T025 Implementar `PasswordService` en `src/auth/password.service.ts` con Base64 de HMAC-SHA-384 sobre la contraseña UTF-8 completa usando `PASSWORD_PEPPER`, seguido de bcrypt costo 12 (RF-005, RF-020, RF-023; US1, US2; CE-007); verificar contraseña sin recorte y entrada bcrypt de 64 caracteres ASCII
-- [ ] T026 Implementar `TokenService` en `src/auth/token.service.ts` con secretos separados, algoritmo, issuer, audience, `typ`, `sub`, `sid`, refresh `jti`, TTL de 15 minutos y 7 días, y SHA-256 del refresh JWT completo (RF-007, RF-010–RF-011, RF-018, RF-020; US2–US4; CE-003, CE-005–CE-007)
-- [ ] T027 Definir respuestas públicas en `src/auth/dto/auth-response.dto.ts`; verificar que solo incluyan tokens recién emitidos, duraciones y proyecciones públicas
-- [ ] T028 Registrar `PasswordService` y `TokenService` en `src/auth/auth.module.ts`; verificar que reciban solo configuración validada mediante inyección
-- [ ] T029 [P] Crear pruebas unitarias de `PasswordService` en `test/unit/auth/password.service.spec.ts` (RF-005, RF-020, RF-023; CE-007); verificar costo 12, HMAC-SHA-384 Base64, UTF-8 mayor a 72 bytes y diferencias posteriores al byte 72
-- [ ] T030 [P] Crear pruebas unitarias de `TokenService` en `test/unit/auth/token.service.spec.ts` (RF-007, RF-010–RF-011, RF-018, RF-020; CE-003, CE-005–CE-007); punto de control: verificar claims, TTL, tipo y rechazo del uso cruzado de secretos
+- [x] T025 Implementar `PasswordService` en `src/auth/password.service.ts` con Base64 de HMAC-SHA-384 sobre la contraseña UTF-8 completa usando `PASSWORD_PEPPER`, seguido de bcrypt costo 12 (RF-005, RF-020, RF-023; US1, US2; CE-007); verificar contraseña sin recorte y entrada bcrypt de 64 caracteres ASCII
+  - Evidencia: pruebas confirman prehash Base64 de 64 caracteres, costo 12, espacios intactos y contraseña UTF-8 completa.
+- [x] T026 Implementar `TokenService` en `src/auth/token.service.ts` con secretos separados, algoritmo, issuer, audience, `typ`, `sub`, `sid`, refresh `jti`, TTL de 15 minutos y 7 días, y SHA-256 del refresh JWT completo (RF-007, RF-010–RF-011, RF-018, RF-020; US2–US4; CE-003, CE-005–CE-007)
+  - Evidencia: pruebas confirman HS384, claims, TTL 900/604800, verificación separada y SHA-256 completo.
+- [x] T027 Definir respuestas públicas en `src/auth/dto/auth-response.dto.ts`; verificar que solo incluyan tokens recién emitidos, duraciones y proyecciones públicas
+  - Evidencia: DTOs compilados exponen solo Account/Workshop públicos y tokens con duraciones.
+- [x] T028 Registrar `PasswordService` y `TokenService` en `src/auth/auth.module.ts`; verificar que reciban solo configuración validada mediante inyección
+  - Evidencia: `AuthModule` registra y exporta ambos servicios; reciben `ConfigService` tipado.
+- [x] T029 [P] Crear pruebas unitarias de `PasswordService` en `test/unit/auth/password.service.spec.ts` (RF-005, RF-020, RF-023; CE-007); verificar costo 12, HMAC-SHA-384 Base64, UTF-8 mayor a 72 bytes y diferencias posteriores al byte 72
+  - Evidencia: pruebas unitarias distinguen contraseñas multibyte mayores a 72 bytes con diferencias posteriores al límite de bcrypt.
+- [x] T030 [P] Crear pruebas unitarias de `TokenService` en `test/unit/auth/token.service.spec.ts` (RF-007, RF-010–RF-011, RF-018, RF-020; CE-003, CE-005–CE-007); punto de control: verificar claims, TTL, tipo y rechazo del uso cruzado de secretos
+  - Evidencia: pruebas unitarias rechazan cruce de secretos y tipos y validan issuer, audience, claims y expiraciones.
 
 ## Fase 5: US1 — Registro con pruebas
 
