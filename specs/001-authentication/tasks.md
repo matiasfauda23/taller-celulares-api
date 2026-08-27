@@ -57,14 +57,22 @@ description: "Tareas ordenadas por dependencias para la feature de autenticació
 
 **Dependencia**: Fase 1 completa.
 
-- [ ] T009 Definir configuración tipada y valores públicos por defecto en `src/config/configuration.ts`, incluidos `JWT_ACCESS_TTL=15m`, `JWT_REFRESH_TTL=7d`, `BCRYPT_ROUNDS=12`, CORS y proxy explícito; verificar que ningún secreto tenga valor por defecto
-- [ ] T010 Implementar validación fail-fast en `src/config/env.validation.ts` para runtime, base, issuer, audience, TTL, CORS, proxy y secretos; comparar por pares `JWT_SECRET`, `JWT_REFRESH_SECRET`, `PASSWORD_PEPPER` y `RATE_LIMIT_KEY_SECRET`, exigir que los cuatro sean distintos entre sí y hacer fallar el arranque ante cualquier coincidencia
-- [ ] T011 [P] Documentar todas las variables con placeholders no secretos en `.env.example`; verificar que no contenga pepper, secretos JWT, clave de rate limiting ni credenciales utilizables
-- [ ] T012 Registrar `ConfigModule` global y la configuración validada en `src/app.module.ts`; verificar que los providers usen `ConfigService` y no lecturas dispersas de `process.env`
-- [ ] T013 Configurar Helmet antes de las rutas, CORS con allowlist, `trust proxy` explícito y `ValidationPipe` con `whitelist`, `forbidNonWhitelisted` y `transform` en `src/main.ts` (RF-021); verificar rechazo de propiedades y orígenes no permitidos
-- [ ] T014 [P] Definir el contrato `{ statusCode, code, message, path, details? }` en `src/common/errors/api-error.response.ts` (RF-004, RF-008, RF-011, RF-019–RF-021, RF-029; CE-004, CE-007, CE-013); verificar que `details` solo represente validación corregible
-- [ ] T015 Implementar y registrar el filtro global en `src/common/errors/api-error.filter.ts` y `src/main.ts`; verificar errores uniformes sin stack, consultas, causas ni secretos
-- [ ] T016 Crear pruebas unitarias de configuración y errores en `test/unit/common/config-errors.spec.ts` (RF-019–RF-021, RF-029; CE-007, CE-013); punto de control: verificar fail-fast, formato y sanitización sin PostgreSQL
+- [x] T009 Definir configuración tipada y valores públicos por defecto en `src/config/configuration.ts`, incluidos `JWT_ACCESS_TTL=15m`, `JWT_REFRESH_TTL=7d`, `BCRYPT_ROUNDS=12`, CORS y proxy explícito; verificar que ningún secreto tenga valor por defecto
+  - Evidencia: configuración tipada compilada; unitarias confirman defaults públicos y ausencia de defaults secretos.
+- [x] T010 Implementar validación fail-fast en `src/config/env.validation.ts` para runtime, base, issuer, audience, TTL, CORS, proxy y secretos; comparar por pares `JWT_SECRET`, `JWT_REFRESH_SECRET`, `PASSWORD_PEPPER` y `RATE_LIMIT_KEY_SECRET`, exigir que los cuatro sean distintos entre sí y hacer fallar el arranque ante cualquier coincidencia
+  - Evidencia: 16 unitarias pasan; arranques aislados terminan con código 1 ante variable ausente y secretos repetidos.
+- [x] T011 [P] Documentar todas las variables con placeholders no secretos en `.env.example`; verificar que no contenga pepper, secretos JWT, clave de rate limiting ni credenciales utilizables
+  - Evidencia: `.env.example` contiene todas las variables y placeholders deliberadamente inválidos para credenciales y secretos.
+- [x] T012 Registrar `ConfigModule` global y la configuración validada en `src/app.module.ts`; verificar que los providers usen `ConfigService` y no lecturas dispersas de `process.env`
+  - Evidencia: `ConfigModule` es global; bootstrap consume configuración mediante `ConfigService` y `process.env` queda confinado a `src/config/`.
+- [x] T013 Configurar Helmet antes de las rutas, CORS con allowlist, `trust proxy` explícito y `ValidationPipe` con `whitelist`, `forbidNonWhitelisted` y `transform` en `src/main.ts` (RF-021); verificar rechazo de propiedades y orígenes no permitidos
+  - Evidencia: bootstrap compilado configura Helmet, allowlist CORS, proxy explícito y las tres opciones estrictas de `ValidationPipe`; validación rechaza CORS permisivo.
+- [x] T014 [P] Definir el contrato `{ statusCode, code, message, path, details? }` en `src/common/errors/api-error.response.ts` (RF-004, RF-008, RF-011, RF-019–RF-021, RF-029; CE-004, CE-007, CE-013); verificar que `details` solo represente validación corregible
+  - Evidencia: tipos públicos compilados y prueba unitaria confirma `details` únicamente para mensajes corregibles de validación.
+- [x] T015 Implementar y registrar el filtro global en `src/common/errors/api-error.filter.ts` y `src/main.ts`; verificar errores uniformes sin stack, consultas, causas ni secretos
+  - Evidencia: filtro global registrado; pruebas confirman respuesta 500 genérica sin secreto, stack, consulta ni causa interna.
+- [x] T016 Crear pruebas unitarias de configuración y errores en `test/unit/common/config-errors.spec.ts` (RF-019–RF-021, RF-029; CE-007, CE-013); punto de control: verificar fail-fast, formato y sanitización sin PostgreSQL
+  - Evidencia: `pnpm format`, `format:check`, `lint`, `test:unit` (16/16) y `build` pasan sin PostgreSQL.
 
 ## Fase 3: Prisma, modelos y migración inicial única
 
