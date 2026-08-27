@@ -1,0 +1,21 @@
+allowBuilds:
+  '@prisma/engines': true
+  '@scarf/scarf': false
+  bcrypt: true
+  prisma: true
+  unrs-resolver: true
+minimumReleaseAgeExclude:
+  - '@nestjs/common@11.2.3'
+  - '@nestjs/core@11.2.3'
+  - '@nestjs/platform-express@11.2.3'
+  - '@nestjs/testing@11.2.3'
+  - '@prisma/adapter-pg@7.10.0'
+  - '@prisma/client-runtime-utils@7.10.0'
+  - '@prisma/client@7.10.0'
+  - '@prisma/config@7.10.0'
+  - '@prisma/debug@7.10.0'
+  - '@prisma/driver-adapter-utils@7.10.0'
+  - '@prisma/engines@7.10.0'
+  - '@prisma/fetch-engine@7.10.0'
+  - '@prisma/get-platform@7.10.0'
+  - prisma@7.10.0

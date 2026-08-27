@@ -34,14 +34,22 @@ description: "Tareas ordenadas por dependencias para la feature de autenticació
 
 **Dependencia**: ninguna.
 
-- [ ] T001 Inicializar NestJS 11 con pnpm para Node.js 24 en `package.json`, `pnpm-lock.yaml`, `nest-cli.json`, `src/main.ts`, `src/app.module.ts` y `tsconfig.json`; verificar que la aplicación mínima compile sin módulos fuera del alcance
-- [ ] T002 Declarar Node.js 24 y la versión de pnpm en `package.json` y `.nvmrc`; verificar que el runtime requerido quede explícito para desarrollo y CI
-- [ ] T003 Activar TypeScript estricto en `tsconfig.json` y `tsconfig.build.json`, incluidos `strict`, `noImplicitAny`, `strictNullChecks` y `noUncheckedIndexedAccess`; verificar que una infracción de tipado impida compilar
-- [ ] T004 [P] Configurar exclusiones de dependencias, compilación, cobertura y secretos locales en `.gitignore`; verificar que `.env`, `node_modules/`, `dist/` y `coverage/` estén ignorados
-- [ ] T005 Configurar ESLint y Prettier en `eslint.config.mjs`, `.prettierrc` y `.prettierignore`; verificar reglas estrictas de TypeScript y formato uniforme
-- [ ] T006 Instalar y fijar dependencias de NestJS, Config, JWT, Passport, validación, Prisma, PostgreSQL, bcrypt, throttling, Helmet, Swagger, Jest y Supertest en `package.json` y `pnpm-lock.yaml`; verificar compatibilidad de las versiones exactas con Node.js 24
-- [ ] T007 Crear configuraciones separadas para pruebas unitarias, de integración y E2E en `test/jest-unit.json`, `test/jest-integration.json` y `test/jest-e2e.json`; verificar que sus patrones no se superpongan
-- [ ] T008 Definir scripts `format`, `format:check`, `lint`, `test`, `test:unit`, `test:integration`, `test:e2e`, `test:bench:auth`, `build`, `prisma:generate`, `prisma:migrate:dev`, `prisma:migrate:deploy` y `prisma:migrate:status` en `package.json`; punto de control: verificar una única entrada reproducible por comando
+- [x] T001 Inicializar NestJS 11 con pnpm para Node.js 24 en `package.json`, `pnpm-lock.yaml`, `nest-cli.json`, `src/main.ts`, `src/app.module.ts` y `tsconfig.json`; verificar que la aplicación mínima compile sin módulos fuera del alcance
+  - **Evidencia**: `pnpm install` resolvió el lockfile; `pnpm build` compiló correctamente la aplicación mínima con Nest CLI `11.0.24`, sin controller, service ni test demostrativos.
+- [x] T002 Declarar Node.js 24 y la versión de pnpm en `package.json` y `.nvmrc`; verificar que el runtime requerido quede explícito para desarrollo y CI
+  - **Evidencia**: `node --version` → `v24.17.0`; `pnpm --version` → `11.22.0`; `package.json` declara `engines.node >=24.0.0`, `engines.pnpm 11.22.0` y `packageManager pnpm@11.22.0`.
+- [x] T003 Activar TypeScript estricto en `tsconfig.json` y `tsconfig.build.json`, incluidos `strict`, `noImplicitAny`, `strictNullChecks` y `noUncheckedIndexedAccess`; verificar que una infracción de tipado impida compilar
+  - **Evidencia**: `tsc --showConfig` confirmó las cuatro opciones; una comprobación temporal con acceso inseguro a un índice falló como se esperaba con `TS2532`, se eliminó y `pnpm build` volvió a finalizar correctamente.
+- [x] T004 [P] Configurar exclusiones de dependencias, compilación, cobertura y secretos locales en `.gitignore`; verificar que `.env`, `node_modules/`, `dist/` y `coverage/` estén ignorados
+  - **Evidencia**: `git check-ignore -v .env node_modules/example dist/example coverage/example` confirmó las cuatro exclusiones y se conservó `.atl/`.
+- [x] T005 Configurar ESLint y Prettier en `eslint.config.mjs`, `.prettierrc` y `.prettierignore`; verificar reglas estrictas de TypeScript y formato uniforme
+  - **Evidencia**: `pnpm format`, `pnpm format:check` y `pnpm lint` finalizaron con código `0`; ESLint usa flat config con reglas TypeScript type-aware.
+- [x] T006 Instalar y fijar dependencias de NestJS, Config, JWT, Passport, validación, Prisma, PostgreSQL, bcrypt, throttling, Helmet, Swagger, Jest y Supertest en `package.json` y `pnpm-lock.yaml`; verificar compatibilidad de las versiones exactas con Node.js 24
+  - **Evidencia**: `pnpm install` instaló versiones exactas y ejecutó los builds aprobados; `pnpm peers check` no encontró conflictos; Nest CLI `11.0.24`, Prisma `7.10.0`, TypeScript `5.9.3` y Jest CLI `30.1.3` se ejecutaron sobre Node.js `v24.17.0`.
+- [x] T007 Crear configuraciones separadas para pruebas unitarias, de integración y E2E en `test/jest-unit.json`, `test/jest-integration.json` y `test/jest-e2e.json`; verificar que sus patrones no se superpongan
+  - **Evidencia**: se inspeccionaron patrones exclusivos `test/unit/**/*.spec.ts`, `test/integration/**/*.integration.spec.ts` y `test/e2e/**/*.e2e-spec.ts`; `pnpm test:unit`, `pnpm test:integration` y `pnpm test:e2e` finalizaron con código `0` informando de forma explícita que aún no existen tests.
+- [x] T008 Definir scripts `format`, `format:check`, `lint`, `test`, `test:unit`, `test:integration`, `test:e2e`, `test:bench:auth`, `build`, `prisma:generate`, `prisma:migrate:dev`, `prisma:migrate:deploy` y `prisma:migrate:status` en `package.json`; punto de control: verificar una única entrada reproducible por comando
+  - **Evidencia**: se verificaron las entradas en `package.json`; `pnpm format:check`, `pnpm lint`, `pnpm build`, `pnpm test`, `pnpm test:integration`, `pnpm test:e2e` y `pnpm test:bench:auth` finalizaron con código `0`.
 
 ## Fase 2: Configuración, seguridad global y errores base
 

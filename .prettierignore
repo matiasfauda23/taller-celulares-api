@@ -1,0 +1,12 @@
+node_modules/
+dist/
+coverage/
+pnpm-lock.yaml
+docs/
+.specify/
+specs/
+.agents/
+.codex/
+.config/
+.copilot/
+.atl/
