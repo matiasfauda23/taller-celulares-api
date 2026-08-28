@@ -16,6 +16,16 @@ enum RefreshCredentialStatus {
   ROTATED
 }
 
+enum WorkOrderStatus {
+  RECEIVED
+  DIAGNOSING
+  WAITING_PARTS
+  REPAIRING
+  READY
+  DELIVERED
+  CANCELLED
+}
+
 model Account {
   id           String    @id @default(uuid()) @db.Uuid
   ownerName    String    @db.VarChar(100)
@@ -28,13 +38,84 @@ model Account {
 }
 
 model Workshop {
-  id        String   @id @default(uuid()) @db.Uuid
-  accountId String   @unique @db.Uuid
-  name      String   @db.VarChar(120)
-  address   String   @db.VarChar(200)
-  createdAt DateTime @default(now()) @db.Timestamptz(3)
-  updatedAt DateTime @updatedAt @db.Timestamptz(3)
-  account   Account  @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  id              String      @id @default(uuid()) @db.Uuid
+  accountId       String      @unique @db.Uuid
+  name            String      @db.VarChar(120)
+  address         String      @db.VarChar(200)
+  createdAt       DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime    @updatedAt @db.Timestamptz(3)
+  account         Account     @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  nextOrderNumber Int         @default(1)
+  clients         Client[]
+  devices         Device[]
+  workOrders      WorkOrder[]
+}
+
+model Client {
+  id         String    @id @default(uuid()) @db.Uuid
+  workshopId String    @db.Uuid
+  firstName  String    @db.VarChar(100)
+  lastName   String    @db.VarChar(100)
+  phone      String    @db.VarChar(40)
+  email      String?   @db.VarChar(254)
+  address    String    @db.VarChar(200)
+  notes      String?   @db.VarChar(1000)
+  archivedAt DateTime? @db.Timestamptz(3)
+  createdAt  DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime  @updatedAt @db.Timestamptz(3)
+  workshop   Workshop  @relation(fields: [workshopId], references: [id], onDelete: Restrict)
+  devices    Device[]
+
+  @@unique([id, workshopId])
+  @@index([workshopId, archivedAt, createdAt])
+}
+
+model Device {
+  id                String      @id @default(uuid()) @db.Uuid
+  workshopId        String      @db.Uuid
+  clientId          String      @db.Uuid
+  brand             String      @db.VarChar(100)
+  model             String      @db.VarChar(100)
+  serialNumber      String?     @db.VarChar(100)
+  color             String?     @db.VarChar(60)
+  physicalCondition String      @db.VarChar(1000)
+  archivedAt        DateTime?   @db.Timestamptz(3)
+  createdAt         DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime    @updatedAt @db.Timestamptz(3)
+  workshop          Workshop    @relation(fields: [workshopId], references: [id], onDelete: Restrict)
+  client            Client      @relation(fields: [clientId, workshopId], references: [id, workshopId], onDelete: Restrict)
+  workOrders        WorkOrder[]
+
+  @@unique([id, workshopId])
+  @@index([workshopId, archivedAt, createdAt])
+  @@index([clientId, workshopId])
+}
+
+model WorkOrder {
+  id              String          @id @default(uuid()) @db.Uuid
+  workshopId      String          @db.Uuid
+  deviceId        String          @db.Uuid
+  orderNumber     Int
+  reportedIssue   String          @db.VarChar(2000)
+  diagnosis       String?         @db.VarChar(2000)
+  workPerformed   String?         @db.VarChar(2000)
+  status          WorkOrderStatus @default(RECEIVED)
+  estimatedBudget Decimal?        @db.Decimal(12, 2)
+  finalPrice      Decimal?        @db.Decimal(12, 2)
+  receivedAt      DateTime        @default(now()) @db.Timestamptz(3)
+  estimatedAt     DateTime?       @db.Timestamptz(3)
+  deliveredAt     DateTime?       @db.Timestamptz(3)
+  notes           String?         @db.VarChar(2000)
+  archivedAt      DateTime?       @db.Timestamptz(3)
+  createdAt       DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime        @updatedAt @db.Timestamptz(3)
+  workshop        Workshop        @relation(fields: [workshopId], references: [id], onDelete: Restrict)
+  device          Device          @relation(fields: [deviceId, workshopId], references: [id, workshopId], onDelete: Restrict)
+
+  @@unique([workshopId, orderNumber])
+  @@index([workshopId, archivedAt, receivedAt, id])
+  @@index([deviceId, workshopId])
+  @@index([workshopId, status])
 }
 
 model Session {

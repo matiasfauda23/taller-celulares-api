@@ -2,7 +2,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { query, resetPublicSchema, runPrisma } from '../setup/postgres.setup';
 
-describe('authentication migration', () => {
+describe('project migrations', () => {
   beforeAll(async () => {
     await resetPublicSchema();
   });
@@ -27,8 +27,11 @@ describe('authentication migration', () => {
     );
     expect(tables.map(({ table_name }) => table_name)).toEqual([
       'Account',
+      'Client',
+      'Device',
       'RefreshCredential',
       'Session',
+      'WorkOrder',
       'Workshop',
     ]);
   }, 30_000);

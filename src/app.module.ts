@@ -7,6 +7,9 @@ import { validateEnvironment } from './config/env.validation';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthThrottlerGuard } from './common/security/auth-throttler.guard';
+import { ClientsModule } from './clients/clients.module';
+import { DevicesModule } from './devices/devices.module';
+import { WorkOrdersModule } from './work-orders/work-orders.module';
 
 const isRoute =
   (method: string, path: string) =>
@@ -63,6 +66,9 @@ const isRoute =
     }),
     PrismaModule,
     AuthModule,
+    ClientsModule,
+    DevicesModule,
+    WorkOrdersModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: AuthThrottlerGuard }],
 })
