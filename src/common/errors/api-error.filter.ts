@@ -32,6 +32,26 @@ const PUBLIC_ERRORS: Record<number, { code: string; message: string }> = {
   },
 };
 
+const ALLOWED_AUTH_ERRORS: Record<string, { status: number; message: string }> =
+  {
+    EMAIL_ALREADY_REGISTERED: {
+      status: HttpStatus.CONFLICT,
+      message: 'Email is already registered',
+    },
+    INVALID_CREDENTIALS: {
+      status: HttpStatus.UNAUTHORIZED,
+      message: 'Invalid credentials',
+    },
+    INVALID_REFRESH_TOKEN: {
+      status: HttpStatus.UNAUTHORIZED,
+      message: 'Invalid refresh token',
+    },
+    AUTHENTICATION_REQUIRED: {
+      status: HttpStatus.UNAUTHORIZED,
+      message: 'Authentication required',
+    },
+  };
+
 @Catch()
 export class ApiErrorFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost): void {
@@ -40,10 +60,15 @@ export class ApiErrorFilter implements ExceptionFilter {
     const response = context.getResponse<Response>();
     const statusCode =
       exception instanceof HttpException ? exception.getStatus() : 500;
-    const publicError = PUBLIC_ERRORS[statusCode] ?? {
-      code: 'INTERNAL_ERROR',
-      message: 'Internal server error',
-    };
+    const controlledError =
+      exception instanceof HttpException
+        ? controlledAuthError(exception, statusCode)
+        : undefined;
+    const publicError = controlledError ??
+      PUBLIC_ERRORS[statusCode] ?? {
+        code: 'INTERNAL_ERROR',
+        message: 'Internal server error',
+      };
     const body: ApiErrorResponse = {
       statusCode,
       ...publicError,
@@ -57,6 +82,19 @@ export class ApiErrorFilter implements ExceptionFilter {
 
     response.status(statusCode).json(body);
   }
+}
+
+function controlledAuthError(
+  exception: HttpException,
+  statusCode: number,
+): { code: string; message: string } | undefined {
+  const response = exception.getResponse();
+  if (typeof response !== 'object' || !('code' in response)) return undefined;
+  const code = (response as { code?: unknown }).code;
+  if (typeof code !== 'string') return undefined;
+  const allowed = ALLOWED_AUTH_ERRORS[code];
+  if (allowed?.status !== statusCode) return undefined;
+  return { code, message: allowed.message };
 }
 
 function validationDetails(

@@ -124,13 +124,13 @@ description: "Tareas ordenadas por dependencias para la feature de autenticació
 
 **Prueba independiente**: `POST /auth/register` crea exactamente un agregado; variantes concurrentes del mismo email producen como máximo un registro y ninguna respuesta filtra secretos.
 
-- [ ] T031 [P] [US1] Implementar validación en `src/auth/dto/register.dto.ts` (RF-001, RF-004, RF-021, RF-023–RF-025; CE-001, CE-002, CE-011); verificar límites, recortes, email en minúsculas, contraseña intacta y rechazo de extras
-- [ ] T032 [P] [US1] Crear `src/accounts/accounts.module.ts` y `src/workshops/workshops.module.ts`, implementar los mappers públicos en `src/accounts/account-public.mapper.ts`, `src/workshops/workshop-public.mapper.ts` y `src/auth/mappers/auth-response.mapper.ts`, exportar los providers necesarios e importar ambos módulos desde `src/auth/auth.module.ts` (RF-020, RF-026–RF-027; CE-007, CE-011); verificar que AuthService pueda usar los mappers sin serializar modelos Prisma
-- [ ] T033 [US1] Implementar registro transaccional en `src/auth/auth.service.ts`, creando Account, Workshop, Session y RefreshCredential y traduciendo `P2002` a `EMAIL_ALREADY_REGISTERED` (RF-001–RF-005, RF-022, RF-026–RF-027; CE-001, CE-002, CE-011; depende de T031–T032)
-- [ ] T034 [US1] Exponer `POST /auth/register` con status `201` en `src/auth/auth.controller.ts` y registrarlo en `src/auth/auth.module.ts` (RF-001, RF-004, RF-026–RF-027; CE-001, CE-011; depende de T033)
-- [ ] T035 [P] [US1] Crear pruebas unitarias de DTOs y mappers en `test/unit/auth/register.spec.ts` (RF-003–RF-005, RF-020–RF-025, RF-027; CE-002, CE-007, CE-011); verificar reglas aisladas y ausencia de campos sensibles
-- [ ] T036 [US1] Crear pruebas de integración PostgreSQL con bcrypt real en `test/integration/auth/register.integration.spec.ts` (RF-001–RF-005, RF-022–RF-023; CE-001, CE-002); verificar transacción, rollback, unicidad concurrente, relación Account–Workshop, hash persistido distinto de la contraseña, verificación correcta, UTF-8 mayor a 72 bytes y no equivalencia de contraseñas que difieren después del byte 72
-- [ ] T037 [US1] Crear pruebas E2E en `test/e2e/auth/register.e2e-spec.ts` (RF-001–RF-005, RF-020–RF-027; CE-001, CE-002, CE-009, CE-011); punto de control: verificar contrato, validación y que la respuesta pública no incluya campos sensibles, dejando la búsqueda exhaustiva de secretos a la auditoría transversal
+- [X] T031 [P] [US1] Implementar validación en `src/auth/dto/register.dto.ts` (RF-001, RF-004, RF-021, RF-023–RF-025; CE-001, CE-002, CE-011); verificar límites, recortes, email en minúsculas, contraseña intacta y rechazo de extras
+- [X] T032 [P] [US1] Crear `src/accounts/accounts.module.ts` y `src/workshops/workshops.module.ts`, implementar los mappers públicos en `src/accounts/account-public.mapper.ts`, `src/workshops/workshop-public.mapper.ts` y `src/auth/mappers/auth-response.mapper.ts`, exportar los providers necesarios e importar ambos módulos desde `src/auth/auth.module.ts` (RF-020, RF-026–RF-027; CE-007, CE-011); verificar que AuthService pueda usar los mappers sin serializar modelos Prisma
+- [X] T033 [US1] Implementar registro transaccional en `src/auth/auth.service.ts`, creando Account, Workshop, Session y RefreshCredential y traduciendo `P2002` a `EMAIL_ALREADY_REGISTERED` (RF-001–RF-005, RF-022, RF-026–RF-027; CE-001, CE-002, CE-011; depende de T031–T032)
+- [X] T034 [US1] Exponer `POST /auth/register` con status `201` en `src/auth/auth.controller.ts` y registrarlo en `src/auth/auth.module.ts` (RF-001, RF-004, RF-026–RF-027; CE-001, CE-011; depende de T033)
+- [X] T035 [P] [US1] Crear pruebas unitarias de DTOs y mappers en `test/unit/auth/register.spec.ts` (RF-003–RF-005, RF-020–RF-025, RF-027; CE-002, CE-007, CE-011); verificar reglas aisladas y ausencia de campos sensibles
+- [X] T036 [US1] Crear pruebas de integración PostgreSQL con bcrypt real en `test/integration/auth/register.integration.spec.ts` (RF-001–RF-005, RF-022–RF-023; CE-001, CE-002); verificar transacción, rollback, unicidad concurrente, relación Account–Workshop, hash persistido distinto de la contraseña, verificación correcta, UTF-8 mayor a 72 bytes y no equivalencia de contraseñas que difieren después del byte 72
+- [X] T037 [US1] Crear pruebas E2E en `test/e2e/auth/register.e2e-spec.ts` (RF-001–RF-005, RF-020–RF-027; CE-001, CE-002, CE-009, CE-011); punto de control: verificar contrato, validación y que la respuesta pública no incluya campos sensibles, dejando la búsqueda exhaustiva de secretos a la auditoría transversal
 
 ## Fase 6: US2 — Login con pruebas
 
@@ -140,12 +140,12 @@ description: "Tareas ordenadas por dependencias para la feature de autenticació
 
 **Prueba independiente**: credenciales válidas entregan un par nuevo; email inexistente y contraseña incorrecta producen exactamente el mismo error.
 
-- [ ] T038 [US2] Implementar validación en `src/auth/dto/login.dto.ts` (RF-006, RF-008, RF-021, RF-024; CE-003, CE-004); verificar email normalizado, contraseña intacta y rechazo de extras
-- [ ] T039 [US2] Implementar login en `src/auth/auth.service.ts` con comparación segura, error genérico y creación atómica de Session y RefreshCredential independientes (RF-006–RF-008, RF-016, RF-020, RF-022; CE-003, CE-004, CE-007)
-- [ ] T040 [US2] Exponer `POST /auth/login` con status `200` en `src/auth/auth.controller.ts` (RF-006–RF-008; CE-003, CE-004; depende de T039)
-- [ ] T041 [US2] Crear pruebas unitarias de validación y errores en `test/unit/auth/login.spec.ts` (RF-006, RF-008, RF-019, RF-021, RF-024; CE-004); verificar igualdad exacta entre email inexistente y contraseña incorrecta
-- [ ] T042 [US2] Crear pruebas de integración PostgreSQL en `test/integration/auth/login.integration.spec.ts` (RF-005–RF-008, RF-016, RF-020, RF-022; CE-003, CE-004, CE-007); verificar persistencia de Session y RefreshCredential independientes y únicamente hashes, sin tokens ni contraseñas brutas
-- [ ] T043 [US2] Crear pruebas E2E en `test/e2e/auth/login.e2e-spec.ts` (RF-006–RF-008, RF-016, RF-020, RF-022; CE-003, CE-004, CE-009); punto de control: verificar tokens, sesiones independientes, error genérico y que la respuesta pública no incluya campos sensibles
+- [X] T038 [US2] Implementar validación en `src/auth/dto/login.dto.ts` (RF-006, RF-008, RF-021, RF-024; CE-003, CE-004); verificar email normalizado, contraseña intacta y rechazo de extras
+- [X] T039 [US2] Implementar login en `src/auth/auth.service.ts` con comparación segura, error genérico y creación atómica de Session y RefreshCredential independientes (RF-006–RF-008, RF-016, RF-020, RF-022; CE-003, CE-004, CE-007)
+- [X] T040 [US2] Exponer `POST /auth/login` con status `200` en `src/auth/auth.controller.ts` (RF-006–RF-008; CE-003, CE-004; depende de T039)
+- [X] T041 [US2] Crear pruebas unitarias de validación y errores en `test/unit/auth/login.spec.ts` (RF-006, RF-008, RF-019, RF-021, RF-024; CE-004); verificar igualdad exacta entre email inexistente y contraseña incorrecta
+- [X] T042 [US2] Crear pruebas de integración PostgreSQL en `test/integration/auth/login.integration.spec.ts` (RF-005–RF-008, RF-016, RF-020, RF-022; CE-003, CE-004, CE-007); verificar persistencia de Session y RefreshCredential independientes y únicamente hashes, sin tokens ni contraseñas brutas
+- [X] T043 [US2] Crear pruebas E2E en `test/e2e/auth/login.e2e-spec.ts` (RF-006–RF-008, RF-016, RF-020, RF-022; CE-003, CE-004, CE-009); punto de control: verificar tokens, sesiones independientes, error genérico y que la respuesta pública no incluya campos sensibles
 
 ## Fase 7: US3 — Guard JWT y `/auth/me` con pruebas
 
@@ -155,12 +155,12 @@ description: "Tareas ordenadas por dependencias para la feature de autenticació
 
 **Prueba independiente**: `/auth/me` rechaza tokens ausentes, inválidos o vencidos y devuelve datos públicos con uno vigente.
 
-- [ ] T044 [US3] Implementar `JwtAccessStrategy` en `src/auth/strategies/jwt-access.strategy.ts` con Bearer access token, algoritmo, issuer, audience y `typ=access`, sin consultar Session (RF-018–RF-020, RF-028; CE-005, CE-007, CE-012)
-- [ ] T045 [US3] Implementar `JwtAccessGuard` en `src/auth/guards/jwt-access.guard.ts` y registrarlo en `src/auth/auth.module.ts` con `AUTHENTICATION_REQUIRED` genérico (RF-018–RF-019; CE-005; depende de T044)
-- [ ] T046 [US3] Agregar `AccountsService` y `WorkshopsService` en `src/accounts/accounts.service.ts` y `src/workshops/workshops.service.ts`, registrarlos y exportarlos desde los módulos ya existentes `src/accounts/accounts.module.ts` y `src/workshops/workshops.module.ts`, y verificar su disponibilidad en `src/auth/auth.module.ts` para `GET /auth/me` (RF-019–RF-020; CE-005, CE-007)
-- [ ] T047 [US3] Exponer `GET /auth/me` protegido por `JwtAccessGuard` en `src/auth/auth.controller.ts` (RF-018–RF-020; CE-005, CE-007; depende de T045–T046)
-- [ ] T048 [US3] Crear pruebas unitarias de estrategia y guard en `test/unit/auth/jwt-access.spec.ts` (RF-018–RF-020, RF-028; CE-005, CE-012); verificar claims, rechazo genérico y ausencia de consulta a Session
-- [ ] T049 [US3] Crear pruebas E2E de `GET /auth/me` en `test/e2e/auth/me.e2e-spec.ts` (RF-018–RF-020, RF-028; CE-005, CE-007, CE-009, CE-012); punto de control: verificar rechazo, acceso válido, expiración aislada y que la respuesta pública no incluya campos sensibles
+- [X] T044 [US3] Implementar `JwtAccessStrategy` en `src/auth/strategies/jwt-access.strategy.ts` con Bearer access token, algoritmo, issuer, audience y `typ=access`, sin consultar Session (RF-018–RF-020, RF-028; CE-005, CE-007, CE-012)
+- [X] T045 [US3] Implementar `JwtAccessGuard` en `src/auth/guards/jwt-access.guard.ts` y registrarlo en `src/auth/auth.module.ts` con `AUTHENTICATION_REQUIRED` genérico (RF-018–RF-019; CE-005; depende de T044)
+- [X] T046 [US3] Agregar `AccountsService` y `WorkshopsService` en `src/accounts/accounts.service.ts` y `src/workshops/workshops.service.ts`, registrarlos y exportarlos desde los módulos ya existentes `src/accounts/accounts.module.ts` y `src/workshops/workshops.module.ts`, y verificar su disponibilidad en `src/auth/auth.module.ts` para `GET /auth/me` (RF-019–RF-020; CE-005, CE-007)
+- [X] T047 [US3] Exponer `GET /auth/me` protegido por `JwtAccessGuard` en `src/auth/auth.controller.ts` (RF-018–RF-020; CE-005, CE-007; depende de T045–T046)
+- [X] T048 [US3] Crear pruebas unitarias de estrategia y guard en `test/unit/auth/jwt-access.spec.ts` (RF-018–RF-020, RF-028; CE-005, CE-012); verificar claims, rechazo genérico y ausencia de consulta a Session
+- [X] T049 [US3] Crear pruebas E2E de `GET /auth/me` en `test/e2e/auth/me.e2e-spec.ts` (RF-018–RF-020, RF-028; CE-005, CE-007, CE-009, CE-012); punto de control: verificar rechazo, acceso válido, expiración aislada y que la respuesta pública no incluya campos sensibles
 
 ## Fase 8: US4 — Refresh, rotación, concurrencia y reutilización con pruebas
 
@@ -170,14 +170,14 @@ description: "Tareas ordenadas por dependencias para la feature de autenticació
 
 **Prueba independiente**: un refresh crea una única sucesora; dos solicitudes concurrentes producen como máximo un `200` y solo la Session afectada pierde renovación.
 
-- [ ] T050 [US4] Implementar validación en `src/auth/dto/refresh.dto.ts` (RF-010–RF-011, RF-021; CE-006); verificar body requerido, extras rechazados y token no expuesto
-- [ ] T051 [US4] Implementar transacciones Serializable y reintentos acotados de `P2034` en `src/auth/session.service.ts` (RF-012, RF-022; CE-006); verificar ausencia de cambios parciales
-- [ ] T052 [US4] Implementar rotación condicional, historial `ROTATED`, sucesora única y expiración en `src/auth/session.service.ts` (RF-010–RF-012, RF-022; CE-006; depende de T051)
-- [ ] T053 [US4] Implementar reutilización y resolución del perdedor concurrente en `src/auth/session.service.ts`, revocando solo la Session con `TOKEN_REUSE` (RF-013, RF-017, RF-028; CE-006, CE-010, CE-012; depende de T052)
-- [ ] T054 [US4] Orquestar refresh en `src/auth/auth.service.ts` y exponer `POST /auth/refresh` en `src/auth/auth.controller.ts` solo tras el commit (RF-010–RF-013, RF-020, RF-022; CE-006, CE-007; depende de T050 y T053)
-- [ ] T055 [US4] Crear pruebas unitarias de decisiones en `test/unit/auth/refresh.spec.ts` (RF-010–RF-013, RF-017, RF-028; CE-006, CE-010, CE-012); verificar reglas aisladas sin atribuir concurrencia a mocks
-- [ ] T056 [US4] Crear pruebas PostgreSQL en `test/integration/auth/refresh.integration.spec.ts` (RF-010–RF-013, RF-017, RF-020, RF-022, RF-028; CE-006, CE-010, CE-012); verificar atomicidad Serializable, una sucesora, máximo un ganador y revocación local
-- [ ] T057 [US4] Crear pruebas E2E en `test/e2e/auth/refresh.e2e-spec.ts` (RF-010–RF-013, RF-017, RF-020, RF-022, RF-028; CE-006, CE-007, CE-009, CE-010, CE-012); punto de control: verificar contrato, concurrencia observable y que la respuesta pública no incluya campos sensibles
+- [X] T050 [US4] Implementar validación en `src/auth/dto/refresh.dto.ts` (RF-010–RF-011, RF-021; CE-006); verificar body requerido, extras rechazados y token no expuesto
+- [X] T051 [US4] Implementar transacciones Serializable y reintentos acotados de `P2034` en `src/auth/session.service.ts` (RF-012, RF-022; CE-006); verificar ausencia de cambios parciales
+- [X] T052 [US4] Implementar rotación condicional, historial `ROTATED`, sucesora única y expiración en `src/auth/session.service.ts` (RF-010–RF-012, RF-022; CE-006; depende de T051)
+- [X] T053 [US4] Implementar reutilización y resolución del perdedor concurrente en `src/auth/session.service.ts`, revocando solo la Session con `TOKEN_REUSE` (RF-013, RF-017, RF-028; CE-006, CE-010, CE-012; depende de T052)
+- [X] T054 [US4] Orquestar refresh en `src/auth/auth.service.ts` y exponer `POST /auth/refresh` en `src/auth/auth.controller.ts` solo tras el commit (RF-010–RF-013, RF-020, RF-022; CE-006, CE-007; depende de T050 y T053)
+- [X] T055 [US4] Crear pruebas unitarias de decisiones en `test/unit/auth/refresh.spec.ts` (RF-010–RF-013, RF-017, RF-028; CE-006, CE-010, CE-012); verificar reglas aisladas sin atribuir concurrencia a mocks
+- [X] T056 [US4] Crear pruebas PostgreSQL en `test/integration/auth/refresh.integration.spec.ts` (RF-010–RF-013, RF-017, RF-020, RF-022, RF-028; CE-006, CE-010, CE-012); verificar atomicidad Serializable, una sucesora, máximo un ganador y revocación local
+- [X] T057 [US4] Crear pruebas E2E en `test/e2e/auth/refresh.e2e-spec.ts` (RF-010–RF-013, RF-017, RF-020, RF-022, RF-028; CE-006, CE-007, CE-009, CE-010, CE-012); punto de control: verificar contrato, concurrencia observable y que la respuesta pública no incluya campos sensibles
 
 ## Fase 9: US5 — Logout con pruebas
 
@@ -187,11 +187,11 @@ description: "Tareas ordenadas por dependencias para la feature de autenticació
 
 **Prueba independiente**: logout repetido devuelve `204`, impide renovar esa Session, conserva sesiones hermanas y mantiene el access token hasta `exp`.
 
-- [ ] T058 [US5] Implementar logout idempotente con `LOGOUT` en `src/auth/session.service.ts` y `src/auth/auth.service.ts` (RF-014–RF-017, RF-022, RF-028; CE-010, CE-012); verificar modificación exclusiva del `sid` autenticado
-- [ ] T059 [US5] Exponer `POST /auth/logout` protegido por `JwtAccessGuard` y con status `204` en `src/auth/auth.controller.ts` (RF-014, RF-018–RF-020; CE-005, CE-007; depende de T058)
-- [ ] T060 [US5] Crear pruebas unitarias de decisiones de logout en `test/unit/auth/logout.spec.ts` (RF-014–RF-017, RF-022, RF-028; CE-010, CE-012); verificar idempotencia, revocación exclusiva del `sid` y vigencia residual del access token
-- [ ] T061 [US5] Crear pruebas PostgreSQL en `test/integration/auth/logout.integration.spec.ts` (RF-014–RF-017, RF-022, RF-028; CE-010, CE-012); verificar idempotencia y sesiones hermanas utilizables
-- [ ] T062 [US5] Crear pruebas E2E en `test/e2e/auth/logout.e2e-spec.ts` (RF-014–RF-020, RF-022, RF-028; CE-005, CE-007, CE-009, CE-010, CE-012); punto de control: verificar `204`, refresh rechazado, sesión hermana activa, access token vigente y ausencia de campos sensibles en la respuesta pública
+- [X] T058 [US5] Implementar logout idempotente con `LOGOUT` en `src/auth/session.service.ts` y `src/auth/auth.service.ts` (RF-014–RF-017, RF-022, RF-028; CE-010, CE-012); verificar modificación exclusiva del `sid` autenticado
+- [X] T059 [US5] Exponer `POST /auth/logout` protegido por `JwtAccessGuard` y con status `204` en `src/auth/auth.controller.ts` (RF-014, RF-018–RF-020; CE-005, CE-007; depende de T058)
+- [X] T060 [US5] Crear pruebas unitarias de decisiones de logout en `test/unit/auth/logout.spec.ts` (RF-014–RF-017, RF-022, RF-028; CE-010, CE-012); verificar idempotencia, revocación exclusiva del `sid` y vigencia residual del access token
+- [X] T061 [US5] Crear pruebas PostgreSQL en `test/integration/auth/logout.integration.spec.ts` (RF-014–RF-017, RF-022, RF-028; CE-010, CE-012); verificar idempotencia y sesiones hermanas utilizables
+- [X] T062 [US5] Crear pruebas E2E en `test/e2e/auth/logout.e2e-spec.ts` (RF-014–RF-020, RF-022, RF-028; CE-005, CE-007, CE-009, CE-010, CE-012); punto de control: verificar `204`, refresh rechazado, sesión hermana activa, access token vigente y ausencia de campos sensibles en la respuesta pública
 
 ## Fase 10: Rate limiting, Swagger y seguridad transversal
 
@@ -199,12 +199,12 @@ description: "Tareas ordenadas por dependencias para la feature de autenticació
 
 **Dependencia**: Fases 5–9 completas.
 
-- [ ] T063 Implementar `AuthThrottlerGuard` con política global de 100/minuto y claves HMAC del email normalizado en `src/common/security/auth-throttler.guard.ts` (RF-009, RF-020, RF-029; US1, US2; CE-007, CE-008, CE-013); verificar que la clave no revele el email
-- [ ] T064 Registrar throttling y límites de registro 5/hora por origen y 3/hora por email, y login 20/15 minutos por origen y 5/15 minutos por email, en `src/app.module.ts` y `src/auth/auth.controller.ts` (RF-009, RF-029; US1, US2; CE-008, CE-013)
-- [ ] T065 Configurar Swagger con Bearer auth en `src/main.ts` y anotar `src/auth/dto/register.dto.ts`, `src/auth/dto/login.dto.ts`, `src/auth/dto/refresh.dto.ts`, `src/auth/dto/auth-response.dto.ts` y `src/auth/auth.controller.ts`; verificar los cinco endpoints, respuestas y ejemplos contra `specs/001-authentication/contracts/auth-api.md` sin modelos internos
-- [ ] T066 [P] Crear pruebas unitarias del tracker en `test/unit/common/auth-throttler.guard.spec.ts` (RF-009, RF-020, RF-029; CE-007, CE-008, CE-013); verificar políticas y claves sin email visible
-- [ ] T067 Crear pruebas E2E de límites y Swagger en `test/e2e/auth/security-swagger.e2e-spec.ts` (RF-009, RF-020, RF-029; CE-007, CE-008, CE-013); verificar `Retry-After`, políticas independientes, ausencia de oráculo y cinco rutas documentadas
-- [ ] T068 Auditar respuestas y logs en `test/e2e/auth/no-secrets.e2e-spec.ts` (RF-005, RF-020, RF-027; CE-007); punto de control: verificar ausencia de contraseña, prehash, pepper, hashes, secretos JWT, stack y consultas
+- [X] T063 Implementar `AuthThrottlerGuard` con política global de 100/minuto y claves HMAC del email normalizado en `src/common/security/auth-throttler.guard.ts` (RF-009, RF-020, RF-029; US1, US2; CE-007, CE-008, CE-013); verificar que la clave no revele el email
+- [X] T064 Registrar throttling y límites de registro 5/hora por origen y 3/hora por email, y login 20/15 minutos por origen y 5/15 minutos por email, en `src/app.module.ts` y `src/auth/auth.controller.ts` (RF-009, RF-029; US1, US2; CE-008, CE-013)
+- [X] T065 Configurar Swagger con Bearer auth en `src/main.ts` y anotar `src/auth/dto/register.dto.ts`, `src/auth/dto/login.dto.ts`, `src/auth/dto/refresh.dto.ts`, `src/auth/dto/auth-response.dto.ts` y `src/auth/auth.controller.ts`; verificar los cinco endpoints, respuestas y ejemplos contra `specs/001-authentication/contracts/auth-api.md` sin modelos internos
+- [X] T066 [P] Crear pruebas unitarias del tracker en `test/unit/common/auth-throttler.guard.spec.ts` (RF-009, RF-020, RF-029; CE-007, CE-008, CE-013); verificar políticas y claves sin email visible
+- [X] T067 Crear pruebas E2E de límites y Swagger en `test/e2e/auth/security-swagger.e2e-spec.ts` (RF-009, RF-020, RF-029; CE-007, CE-008, CE-013); verificar `Retry-After`, políticas independientes, ausencia de oráculo y cinco rutas documentadas
+- [X] T068 Auditar respuestas y logs en `test/e2e/auth/no-secrets.e2e-spec.ts` (RF-005, RF-020, RF-027; CE-007); punto de control: verificar ausencia de contraseña, prehash, pepper, hashes, secretos JWT, stack y consultas
 
 ## Fase 11: Validación final, README y evidencia
 
@@ -255,3 +255,9 @@ description: "Tareas ordenadas por dependencias para la feature de autenticació
 ## Validación del formato
 
 Las 73 tareas usan checkbox, ID secuencial, `[P]` solo ante independencia real, etiquetas `[US1]`–`[US5]`, rutas exactas, referencias RF/CE aplicables y resultados verificables.
+
+### Evidencia T031–T068 (2026-08-27)
+
+- Implementación: cinco endpoints HTTP, DTOs/mappers públicos, JWT access guard, sesiones, refresh Serializable con rotación/reuse, logout, throttling HMAC y Swagger.
+- Pruebas: 34 unitarias, 9 de integración PostgreSQL y 11 E2E aprobadas.
+- Calidad: `format`, `format:check`, `lint`, `build`, `prisma:generate` y `prisma:migrate:status` verificados; T069 y posteriores no ejecutadas.
