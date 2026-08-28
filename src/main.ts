@@ -27,8 +27,14 @@ export function configureApplication(app: NestExpressApplication): void {
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Mobile Repair Shop API')
-    .setDescription('Public authentication API')
+    .setDescription(
+      'Authenticated API for repair-shop accounts, clients, devices, and work orders',
+    )
     .setVersion('1.0')
+    .addTag('Authentication', 'Account registration and session lifecycle')
+    .addTag('Clients', 'Workshop client management')
+    .addTag('Devices', 'Client device management')
+    .addTag('WorkOrders', 'Repair work-order lifecycle')
     .addBearerAuth(
       { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
       'access-token',

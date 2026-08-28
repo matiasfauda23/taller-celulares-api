@@ -29,6 +29,38 @@ describe('authentication security and Swagger', () => {
       expect.objectContaining({ type: 'http', scheme: 'bearer' }),
     );
   });
+  it('groups every MVP domain operation under its Swagger tag', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/api/docs-json')
+      .expect(200);
+    const expectedOperations: Record<string, string[]> = {
+      '/clients': ['post', 'get'],
+      '/clients/{id}': ['get', 'patch', 'delete'],
+      '/devices': ['post', 'get'],
+      '/devices/{id}': ['get', 'patch', 'delete'],
+      '/work-orders': ['post', 'get'],
+      '/work-orders/{id}': ['get', 'patch', 'delete'],
+      '/work-orders/{id}/status': ['patch'],
+    };
+    const expectedTags: Record<string, string> = {
+      '/clients': 'Clients',
+      '/clients/{id}': 'Clients',
+      '/devices': 'Devices',
+      '/devices/{id}': 'Devices',
+      '/work-orders': 'WorkOrders',
+      '/work-orders/{id}': 'WorkOrders',
+      '/work-orders/{id}/status': 'WorkOrders',
+    };
+    for (const [path, methods] of Object.entries(expectedOperations)) {
+      expect(Object.keys(response.body.paths[path]).sort()).toEqual(
+        methods.sort(),
+      );
+      for (const method of methods)
+        expect(response.body.paths[path][method].tags).toContain(
+          expectedTags[path],
+        );
+    }
+  });
   it('applies normalized-email throttling with Retry-After and no email oracle', async () => {
     const bodies = Array.from({ length: 4 }, (_, index) =>
       registerBody(index % 2 ? ' RATE@example.com ' : 'rate@example.com'),
