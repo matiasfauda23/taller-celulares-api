@@ -40,15 +40,13 @@ export class ClientsService {
   async list(accountId: string, q: PaginationDto) {
     const workshopId = await this.workshopId(accountId);
     const where = { workshopId, archivedAt: null };
-    const [rows, total] = await this.prisma.$transaction([
-      this.prisma.client.findMany({
-        where,
-        orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
-        skip: (q.page - 1) * q.limit,
-        take: q.limit,
-      }),
-      this.prisma.client.count({ where }),
-    ]);
+    const rows = await this.prisma.client.findMany({
+      where,
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+      skip: (q.page - 1) * q.limit,
+      take: q.limit,
+    });
+    const total = await this.prisma.client.count({ where });
     return {
       data: rows.map((x) => this.mapper.toPublic(x)),
       meta: { page: q.page, limit: q.limit, total },
