@@ -20,6 +20,8 @@ export interface AppConfiguration {
     trustProxy: false | string[];
     registerOriginLimit: number;
     registerEmailLimit: number;
+    loginOriginLimit: number;
+    loginEmailLimit: number;
     globalRateLimit: number;
   };
 }
@@ -40,6 +42,16 @@ export const registerOriginLimit = (): number =>
   Number(process.env.REGISTER_ORIGIN_LIMIT ?? 5);
 export const registerEmailLimit = (): number =>
   Number(process.env.REGISTER_EMAIL_LIMIT ?? 3);
+
+/**
+ * Login throttles, same rationale as the signup ones. A serial E2E spec signs in once per test
+ * and every run shares one IP, so the production defaults throttle verification runs partway
+ * through a suite. Overridable per environment; the defaults stay production-safe.
+ */
+export const loginOriginLimit = (): number =>
+  Number(process.env.LOGIN_ORIGIN_LIMIT ?? 20);
+export const loginEmailLimit = (): number =>
+  Number(process.env.LOGIN_EMAIL_LIMIT ?? 5);
 
 /** Same rationale as the signup throttles: a parallel E2E run bursts well past 100 req/min. */
 export const globalRateLimit = (): number =>
@@ -76,6 +88,8 @@ export default (): AppConfiguration => ({
             .map((value) => value.trim()),
     registerOriginLimit: registerOriginLimit(),
     registerEmailLimit: registerEmailLimit(),
+    loginOriginLimit: loginOriginLimit(),
+    loginEmailLimit: loginEmailLimit(),
     globalRateLimit: globalRateLimit(),
   },
 });

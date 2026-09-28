@@ -4,6 +4,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
 import configuration, {
   globalRateLimit,
+  loginEmailLimit,
+  loginOriginLimit,
   registerEmailLimit,
   registerOriginLimit,
 } from './config/configuration';
@@ -59,13 +61,13 @@ const isRoute =
         {
           name: 'login-origin',
           ttl: 900_000,
-          limit: 20,
+          limit: loginOriginLimit(),
           skipIf: (context) => !isRoute('POST', '/auth/login')(context),
         },
         {
           name: 'login-email',
           ttl: 900_000,
-          limit: 5,
+          limit: loginEmailLimit(),
           skipIf: (context) => !isRoute('POST', '/auth/login')(context),
         },
       ],

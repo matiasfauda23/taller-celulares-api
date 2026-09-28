@@ -49,6 +49,7 @@ describe('registration DTO and public mappers', () => {
       address: 'Street',
       createdAt: new Date(),
       updatedAt: new Date(),
+      nextOrderNumber: 1,
     };
     const result = mapper.toAuthResponse(account, workshop, {
       accessToken: 'access',
