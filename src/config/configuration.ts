@@ -18,6 +18,9 @@ export interface AppConfiguration {
     rateLimitKeySecret: string;
     corsAllowedOrigins: string[];
     trustProxy: false | string[];
+    registerOriginLimit: number;
+    registerEmailLimit: number;
+    globalRateLimit: number;
   };
 }
 
@@ -27,6 +30,20 @@ const environmentValue = (key: string): string => {
     throw new Error(`Validated environment value unavailable: ${key}`);
   return value;
 };
+
+/**
+ * Signup throttles. The E2E suite registers a fresh account per spec file and every request
+ * shares one IP, so the production defaults would throttle verification runs after a handful
+ * of signups. Overridable per environment; the defaults stay production-safe.
+ */
+export const registerOriginLimit = (): number =>
+  Number(process.env.REGISTER_ORIGIN_LIMIT ?? 5);
+export const registerEmailLimit = (): number =>
+  Number(process.env.REGISTER_EMAIL_LIMIT ?? 3);
+
+/** Same rationale as the signup throttles: a parallel E2E run bursts well past 100 req/min. */
+export const globalRateLimit = (): number =>
+  Number(process.env.GLOBAL_RATE_LIMIT ?? 100);
 
 export default (): AppConfiguration => ({
   runtime: {
@@ -57,5 +74,8 @@ export default (): AppConfiguration => ({
         : environmentValue('TRUST_PROXY')
             .split(',')
             .map((value) => value.trim()),
+    registerOriginLimit: registerOriginLimit(),
+    registerEmailLimit: registerEmailLimit(),
+    globalRateLimit: globalRateLimit(),
   },
 });

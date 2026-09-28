@@ -20,7 +20,6 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import {
   AuthResponseDto,
@@ -53,10 +52,6 @@ export class AuthController {
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  @Throttle({
-    'register-origin': { limit: 5, ttl: 3_600_000 },
-    'register-email': { limit: 3, ttl: 3_600_000 },
-  })
   @ApiOperation({ summary: 'Register an account and workshop' })
   @ApiCreatedResponse({ type: AuthResponseDto })
   @ApiConflictResponse({
@@ -74,10 +69,6 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @Throttle({
-    'login-origin': { limit: 20, ttl: 900_000 },
-    'login-email': { limit: 5, ttl: 900_000 },
-  })
   @ApiOperation({ summary: 'Create an independent session' })
   @ApiOkResponse({ type: AuthResponseDto })
   @ApiUnauthorizedResponse({

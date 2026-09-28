@@ -2,7 +2,11 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
-import configuration from './config/configuration';
+import configuration, {
+  globalRateLimit,
+  registerEmailLimit,
+  registerOriginLimit,
+} from './config/configuration';
 import { validateEnvironment } from './config/env.validation';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -36,18 +40,20 @@ const isRoute =
       validate: validateEnvironment,
     }),
     ThrottlerModule.forRoot({
+      // Single source of truth for the auth throttles. A route-level @Throttle decorator would
+      // silently override these env-driven limits, so register/login must not redeclare them.
       throttlers: [
-        { name: 'global', ttl: 60_000, limit: 100 },
+        { name: 'global', ttl: 60_000, limit: globalRateLimit() },
         {
           name: 'register-origin',
           ttl: 3_600_000,
-          limit: 5,
+          limit: registerOriginLimit(),
           skipIf: (context) => !isRoute('POST', '/auth/register')(context),
         },
         {
           name: 'register-email',
           ttl: 3_600_000,
-          limit: 3,
+          limit: registerEmailLimit(),
           skipIf: (context) => !isRoute('POST', '/auth/register')(context),
         },
         {
